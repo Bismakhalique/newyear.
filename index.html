@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy New Year</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="card">
+    <div class="fireworks"></div>
+    <h1 class="greeting">🎉 Happy New Year MY Swan!🦢 🎆</h1>
+    <p class="message">Here’s to us, to love, and to a New Year filled with endless possibilities 💟. Thank you for being the most beautiful part of my story. Let’s make this year our best chapter yet. ❤️
+     I am very excited for 2025 because IN SHAA ALLAH we will meet this year😍 . May our every year ends and starts together❤️.
+
+    </p>
+    <button class="confetti-btn">let's click to Celebrate 🎊</button>
+  </div>
+  <canvas id="fireworkCanvas"></canvas>
+  <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
+  <!-- <script src="script.js"></script> -->
+</body>
+</html> 
+
+
+<script>
+const canvas = document.getElementById("fireworkCanvas");
+const ctx = canvas.getContext("2d");
+const explosionSound = document.getElementById("explosionSound");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const fireworks = [];
+const particles = [];
+
+// Helper Functions
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// Firework Class
+class Firework {
+  constructor(x, y, targetX, targetY, color) {
+    this.x = x;
+    this.y = y;
+    this.targetX = targetX;
+    this.targetY = targetY;
+    this.color = color;
+    this.speed = 5;
+    this.angle = Math.atan2(targetY - y, targetX - x);
+    this.distanceToTarget = Math.sqrt((targetX - x) ** 2 + (targetY - y) ** 2);
+    this.currentDistance = 0;
+    this.exploded = false;
+  }
+
+  update() {
+    if (!this.exploded) {
+      this.x += Math.cos(this.angle) * this.speed;
+      this.y += Math.sin(this.angle) * this.speed;
+      this.currentDistance += this.speed;
+
+      if (this.currentDistance >= this.distanceToTarget) {
+        this.exploded = true;
+        createParticles(this.x, this.y, this.color);
+        explosionSound.currentTime = 0;
+        explosionSound.play(); // Play sound on explosion
+      }
+    }
+  }
+
+  draw() {
+    if (!this.exploded) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  }
+}
+
+// Particle Class
+class Particle {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.size = random(2, 5);
+    this.speedX = random(-5, 5);
+    this.speedY = random(-5, 5);
+    this.opacity = 1;
+    this.gravity = 0.1;
+  }
+
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.speedY += this.gravity;
+    this.opacity -= 0.02;
+  }
+
+  draw() {
+    if (this.opacity > 0) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+      ctx.fill();
+    }
+  }
+}
+
+// Create Particles
+function createParticles(x, y, color) {
+  for (let i = 0; i < 50; i++) {
+    particles.push(new Particle(x, y, color));
+  }
+}
+
+// Animation Loop
+function animate() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  fireworks.forEach((firework, index) => {
+    firework.update();
+    firework.draw();
+
+    if (firework.exploded) {
+      fireworks.splice(index, 1);
+    }
+  });
+
+  particles.forEach((particle, index) => {
+    particle.update();
+    particle.draw();
+
+    if (particle.opacity <= 0) {
+      particles.splice(index, 1);
+    }
+  });
+
+  // Draw the one-liner text
+  ctx.font = "30px Arial";
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.fillText("May your dreams light up the sky this New Year!💌   Ich liebe dich.Kashan💕 ", canvas.width / 2, canvas.height - 50);
+
+  requestAnimationFrame(animate);
+}
+
+// Launch Fireworks
+function launchFirework() {
+  const x = canvas.width / 2;
+  const y = canvas.height;
+  const targetX = random(100, canvas.width - 100);
+  const targetY = random(100, canvas.height / 2);
+  const color = `${Math.floor(random(0, 255))}, ${Math.floor(random(0, 255))}, ${Math.floor(random(0, 255))}`;
+  fireworks.push(new Firework(x, y, targetX, targetY, color));
+}
+
+// Firework Loop
+setInterval(launchFirework, 1000);
+
+// Start Animation
+animate();
+</script>
